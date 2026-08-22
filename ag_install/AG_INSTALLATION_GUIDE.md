@@ -176,3 +176,62 @@ rm -f ~/.local/share/bash-completion/completions/antigravity-ide ~/.local/share/
 rm -f ~/.local/share/zsh/site-functions/_antigravity-ide
 update-desktop-database ~/.local/share/applications || true
 ```
+
+---
+
+## 5. Known Issues & Troubleshooting
+
+### Issue: IDE Fails to Launch on Ubuntu 24.04+ / 26.04+ (AppArmor / SUID Sandbox Error)
+
+#### Symptoms
+Launching `antigravity-ide` or `ag` causes the app to exit immediately or fail silently. In verbose mode (`~/.local/share/antigravity-ide/antigravity-ide --verbose`), the following error appears:
+
+```text
+[FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /home/tom/.local/share/antigravity-ide/chrome-sandbox is owned by root and has mode 4755.
+```
+
+#### Cause
+Ubuntu 24.04+ / 26.04+ restricts unprivileged user namespaces (`kernel.apparmor_restrict_unprivileged_userns = 1`). User-local installs lack an AppArmor profile granting `userns` permissions, and user-extracted `chrome-sandbox` lacks root SUID permissions (`4755`).
+
+#### Solutions
+
+##### Option 1: Create an AppArmor Profile (Recommended)
+```bash
+sudo tee /etc/apparmor.d/antigravity-ide << 'EOF'
+abi <abi/5.0>,
+include <tunables/global>
+
+profile antigravity-ide /home/*/.local/share/antigravity-ide/antigravity-ide flags=(unconfined) {
+  userns,
+  @{exec_path} mr,
+
+  include if exists <local/antigravity-ide>
+}
+EOF
+
+sudo apparmor_parser -r /etc/apparmor.d/antigravity-ide
+```
+
+##### Option 2: Set Root SUID Permissions on `chrome-sandbox`
+```bash
+sudo chown root:root ~/.local/share/antigravity-ide/chrome-sandbox
+sudo chmod 4755 ~/.local/share/antigravity-ide/chrome-sandbox
+```
+
+##### Option 3: Disable AppArmor Namespace Restrictions System-Wide
+```bash
+sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+```
+
+##### Option 4: Non-Root Workaround (`--no-sandbox`)
+If `sudo` privileges are not available, configure Antigravity IDE to pass `--no-sandbox` automatically:
+1. **Update CLI Launcher Script** in `~/.local/share/antigravity-ide/bin/antigravity-ide`:
+   ```bash
+   ELECTRON_RUN_AS_NODE=1 "$ELECTRON" "$CLI" --no-sandbox "$@"
+   ```
+2. **Desktop Launcher** in `~/.local/share/applications/antigravity-ide.desktop`:
+   ```ini
+   Exec=/home/tom/.local/bin/antigravity-ide %F
+   ```
+
+
