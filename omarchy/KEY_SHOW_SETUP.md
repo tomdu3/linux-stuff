@@ -268,7 +268,67 @@ hyprctl configerrors
 
 ---
 
-## 10. References
+## 10. Make the letters smaller & reduce spacing
+
+The letters are **not** sized directly — they scale with the **size of the
+floating window**, and the internal **spacing** is a separate setting. All of
+these are stored in SMTK's GSettings and are safely adjustable.
+
+### 10.1 Make the letters smaller (shrink the window)
+
+The keys are drawn to fill the floating window's width/height, so a smaller
+window = smaller letters.
+
+```bash
+gsettings set one.alynx.showmethekey width 900      # default 1500 pixels
+gsettings set one.alynx.showmethekey height 120     # default 200 pixels
+```
+
+- Both accept any value `>= 0`.
+- Because the Hyprland `center`/`move` rules use `window_w`/`window_h` in
+  their expressions, the overlay **stays centered / in the chosen corner
+  automatically** no matter what size you pick.
+- Smaller values = smaller text; there's no separate "font size" setting.
+
+### 10.2 Reduce the spacing around the letters
+
+**`margin-ratio`** is the padding/margin between the keys and the window
+edges. Lower it to pack the keys tighter (less empty space around them).
+
+```bash
+gsettings set one.alynx.showmethekey margin-ratio 0.25     # default 0.4
+```
+
+- Lower value = less spacing; `0` = keys flush to the edges. Start around
+  `0.2`–`0.3` and tweak to taste.
+
+### 10.3 Use compact key display mode
+
+The **`mode`** setting controls how key combinations are rendered. `compact`
+already merges and tightens the combination display (e.g. `Ctrl+Shift` shown
+compactly), which reduces overall width.
+
+```bash
+gsettings set one.alynx.showmethekey mode compact   # 'composed' | 'raw' | 'compact'
+```
+
+### Recommended starting combo for a neat, small overlay
+
+```bash
+gsettings set one.alynx.showmethekey width 900
+gsettings set one.alynx.showmethekey height 120
+gsettings set one.alynx.showmethekey margin-ratio 0.25
+gsettings set one.alynx.showmethekey mode compact
+```
+
+Restart the overlay with `SUPER + SHIFT + K` (toggle off, then on) to apply.
+> This exact combination is **verified on this machine**: the overlay window
+> rendered at `[900 x 120]` pixels, still centered at `[1270, 673]` on the
+> 3440×1440 monitor.
+
+---
+
+## 11. References
 
 - Project website: <https://showmethekey.alynx.one/>
 - GitHub repository: <https://github.com/AlynxZhou/showmethekey>
