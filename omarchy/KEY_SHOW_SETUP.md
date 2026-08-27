@@ -334,3 +334,50 @@ Restart the overlay with `SUPER + SHIFT + K` (toggle off, then on) to apply.
 - GitHub repository: <https://github.com/AlynxZhou/showmethekey>
 - Releases: <https://github.com/AlynxZhou/showmethekey/releases>
 - Hyprland window rules (Lua): <https://wiki.hypr.land/Configuring/Basics/Window-Rules/>
+
+---
+
+## 12. My Current Setup
+
+The exact settings applied on this machine (as of setup) to reproduce the
+current look: a **small, tight overlay fixed in the bottom-right corner**.
+
+### Hyprland config — `~/.config/hypr/hyprland.lua`
+
+```lua
+-- showmethekey: keep its windows floating and render the keystroke display as
+-- an overlay (instead of a tiled window) without stealing focus.
+o.window("one.alynx.showmethekey", { float = true, no_focus = true, pin = true })
+
+-- Bottom-right position (with 80px / 60px screen-edge margins).
+o.window({ class = "one.alynx.showmethekey", title = "Floating Window - Show Me The Key" }, {
+  move = { "(monitor_w-window_w-80)", "(monitor_h-window_h-60)" },
+})
+```
+
+### Hyprland config — `~/.config/hypr/bindings.lua`
+
+`SUPER + SHIFT + K` toggles the overlay on/off:
+
+```lua
+o.bind("SUPER + SHIFT + K", "Show keystrokes", "bash -c 'N=show; N=${N}methekey-gtk; if pgrep -f \"$N -\" >/dev/null; then pkill -f \"$N\"; else sleep 1; setsid \"$N\" -A -k -C >/dev/null 2>&1 & disown; fi'")
+```
+
+### Show Me The Key settings (GSettings)
+
+```bash
+gsettings set one.alynx.showmethekey active        true
+gsettings set one.alynx.showmethekey width         760
+gsettings set one.alynx.showmethekey height        80
+gsettings set one.alynx.showmethekey margin-ratio  0.15
+gsettings set one.alynx.showmethekey mode          compact
+gsettings set one.alynx.showmethekey draw-border   false
+```
+
+### Resulting look (verified)
+
+- Floating overlay window: **760 × 80 px**.
+- Anchored **bottom-right** of the 3440×1440 monitor at `(2600, 1300)`.
+- Letters small, padding tight, compact key-combination display, no border.
+- Toggled with **`SUPER + SHIFT + K`**.
+
