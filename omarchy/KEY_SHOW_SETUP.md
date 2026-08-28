@@ -371,6 +371,7 @@ gsettings set one.alynx.showmethekey width         760
 gsettings set one.alynx.showmethekey height        80
 gsettings set one.alynx.showmethekey margin-ratio  0.15
 gsettings set one.alynx.showmethekey mode          compact
+gsettings set one.alynx.showmethekey timeout       3000
 gsettings set one.alynx.showmethekey draw-border   false
 ```
 
@@ -379,5 +380,22 @@ gsettings set one.alynx.showmethekey draw-border   false
 - Floating overlay window: **760 × 80 px**.
 - Anchored **bottom-right** of the 3440×1440 monitor at `(2600, 1300)`.
 - Letters small, padding tight, compact key-combination display, no border.
+- **Auto-hides after 3 s** of no typing (`timeout 3000`).
+- **Compact mode** — special keys show glyph symbols (`⌫` Backspace, `⏎`
+  Enter, `⇥` Tab, `←→↑↓`, `⎵` Space, `Esc`), at the cost of held keys being
+  shown as `xN` repeat counters instead of repeated characters.
 - Toggled with **`SUPER + SHIFT + K`**.
+
+> **Mode trade-off (defaults & symbols vs. repeat counter).** These are
+> coupled in showmethekey and there is no single toggle for both:
+>
+> | Mode | Repeats | Special keys |
+> |---|---|---|
+> | `compact` (current) | merges to `xN` counter | glyph symbols (⌫, ⏎, ←, ⎵…) |
+> | `composed` | each keystroke shown individually | word labels (Space, Enter, Backspace…) |
+> | `raw` | each keystroke shown individually | raw key names |
+>
+> The only way to get **both** glyph symbols **and** no `xN` counter is a
+> source patch to showmethekey (making the compact symbol table apply in
+> composed mode) followed by a custom AUR build — offered but not applied here.
 
